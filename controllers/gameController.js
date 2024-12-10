@@ -6,6 +6,8 @@ const games = {};
 // Helper function to generate a new game ID
 const generateGameId = () => `game-${Date.now()}`;
 
+
+
 // Controller Functions
 module.exports = {
   // Start a new game
@@ -33,6 +35,46 @@ module.exports = {
     };
 
     return res.status(200).json({ gameId, playerBoard, computerBoardPreview: computerBoard.map(row => row.map(() => null)) });
+  },
+
+  // Place ships function
+  placeShips: (req, res) => {
+    const { gameId, ships } = req.body;
+    const game = games[gameId];
+
+    if (!game) {
+      return res.status(404).json({ message: "Game not found." });
+    }
+
+    // Validate ship positions
+    const isValid = ships.every((ship) => {
+      return ship.positions.every(({ row, col }) => {
+        return (
+          row >= 0 &&
+          col >= 0 &&
+          row < 10 &&
+          col < 10 &&
+          game.playerBoard[row][col] === null
+        );
+      });
+    });
+
+    if (!isValid) {
+      return res.status(400).json({ message: 'Invalid ship placement.' });
+    }
+
+    // Place ships on the board
+    ships.forEach((ship) => {
+      ship.positions.forEach(({ row, col }) => {
+        game.playerBoard[row][col] = ship.name;
+      });
+      game.playerShips.push(ship);
+    });
+
+    return res.status(200).json({
+      message: 'Ships placed successfully!',
+      playerBoard: game.playerBoard,
+    });
   },
 
   // Player attacks the computer

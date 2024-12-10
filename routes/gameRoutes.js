@@ -6,5 +6,6 @@ router.post("/start", gameController.startGame);
 router.post("/attack", gameController.playerAttack);
 router.post("/computer-turn", gameController.computerAttack);
 router.get("/:gameId/stats", gameController.getStats);
+router.post("/place-ships", gameController.placeShips);
 
 module.exports = router;
