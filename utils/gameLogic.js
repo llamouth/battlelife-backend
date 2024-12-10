@@ -37,5 +37,24 @@ const placeShipRandomly = (grid, ship) => {
     }
   };
   
-  module.exports = { placeShipRandomly };
+  const validateAttack = (grid, row, col) => {
+    if (row < 0 || col < 0 || row >= 10 || col >= 10) {
+      return { valid: false, message: 'Invalid coordinates.' };
+    }
+  
+    const cell = grid[row][col];
+    if (cell === null) {
+      return { valid: true, hit: false };
+    } else if (cell === 'hit' || cell === 'miss') {
+      return { valid: false, message: 'Cell already targeted.' };
+    }
+  
+    return { valid: true, hit: true, ship: cell };
+  };
+
+  const checkWinCondition = (ships) => {
+    return ships.every((ship) => ship.isSunk());
+  };
+
+  module.exports = { placeShipRandomly, validateAttack, checkWinCondition };
   
