@@ -1,106 +1,92 @@
-const axios = require('axios');
-const Anthropic = require('@anthropic/anthropic');
-
-const anthropic = new Anthropic({
-    apiKey: process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY,
-    dangerouslyAllowBrowser: true,
-})
-
 require('dotenv').config();
-const CLAUDE_API_KEY = process.env.CLAUDE_API_KEY;
+const Anthropic = require('@anthropic-ai/sdk');
+const { parseScenarioResponse, parseSummaryResponse } = require('../Utils/claudeUtils');
+const CLAUDE_API_KEY = process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY;
+const anthropic = new Anthropic({ apiKey: CLAUDE_API_KEY,
+    dangerouslyAllowBrowser: true,
+ });
 
-const fetchScenario = async (action) => {
-    const { shipType } = action;
-
+// Fetch Scenario Function
+const fetchScenario = async ({shipType}) => {
     try {
+        // Predefined scenario templates
         const scenarioTemplates = {
-            health: "Describe an unexpected medical challenge or lifestyle change.",
-            relationships: "Describe a complex interpersonal challenge.",
-            money: "Describe an unexpected economic hurdle.",
-            looks: "Describe a scenario challenging self-perception.",
-            home: "Describe an unexpected housing scenario."
-            };
-    
-            if (!scenarioTemplates[shipType]) {
-            throw new Error(`Invalid ship type: ${shipType}`);
-            }
-    
-            const prompt = `
-        BATTLESHIP LIFE SIMULATOR SCENARIO:
-    
-        You are targeting a Life Ship of type: ${shipType}
-        Each ship represents a crucial aspect of life that can be "hit" with unexpected challenges.
-        This is a ${shipType.toUpperCase()} class vessel, representing ${scenarioTemplates[shipType]}
-    
-        Create a life-changing event that would "hit" this aspect of life:
-        1. A BRIEF hit type (2-3 words describing the type of life challenge)
-        2. A DETAILED scenario (3-4 sentences about how this life challenge unfolds)
-        3. Potential CONSEQUENCES (how this "hit" affects the player's life journey)
-        4. THREE different choices the player can make to respond to this situation
-    
-        Remember: This is a critical hit on the ${shipType} ship - make it impactful but survivable.
-        Each choice should have different potential outcomes and risks.
-    
-        Format your response exactly as:
-        Hit Type: [concise description]
-        Scenario: [narrative description]
-        Consequences: [impact on the character]`;
-    
+        health: "Describe an unexpected medical challenge or lifestyle change.",
+        relationships: "Describe a complex interpersonal challenge.",
+        money: "Describe an unexpected economic hurdle.",
+        looks: "Describe a scenario challenging self-perception.",
+        home: "Describe an unexpected housing scenario."
+        };
+
+        if (!scenarioTemplates[shipType]) {
+        throw new Error(`Invalid ship type: ${shipType}`);
+        }
+
+        const prompt = `
+BATTLESHIP LIFE SIMULATOR SCENARIO:
+
+You are targeting a Life Ship of type: ${shipType}.
+Each ship represents a crucial aspect of life that can be "hit" with unexpected challenges.
+This is a ${shipType.toUpperCase()} class vessel, representing ${scenarioTemplates[shipType]}.
+
+Create a life-changing event that would "hit" this aspect of life:
+1. A BRIEF hit type (2-3 words describing the type of life challenge).
+2. A DETAILED scenario (3-4 sentences about how this life challenge unfolds).
+3. Potential CONSEQUENCES (how this "hit" affects the player's life journey).
+
+Remember: This is a critical hit on the ${shipType} ship - make it impactful but survivable.
+Each choice should have different potential outcomes and risks.
+
+Format your response exactly as:
+
+Hit Type: [concise description]
+Scenario: [narrative description]
+Consequences: [impact on the character]
+`;
+
         const msg = await anthropic.messages.create({
             model: 'claude-3-sonnet-20240229',
             max_tokens: 1024,
-            messages: [{role: 'user', content: prompt}],
-        })
+            messages: [{ role: 'user', content: prompt }]
+        });
 
-        const response = JSON.parse(msg.content[0].text)
-        return response; // Returns the generated scenario
+        return parseScenarioResponse(msg.content[0].text);
     } catch (error) {
-        console.log(error);
-        console.error('Error fetching scenario from Claude API:', error.message);
-        throw new Error('Failed to fetch scenario');
+        console.error("Error generating scenario:", error);
+        throw new Error("Failed to generate scenario");
     }
 };
 
-const fetchSummary = async (user) => {
-    const { health, money, relationships, career, home } = req.body;
+// Parse the API Response
 
-    if (!user) {
-    return res.status(400).json({ error: 'Final stats are required' });
-    }
+// Fetch Summary Function
+const fetchSummary = async (finalStats) => {
+    const { health, money, relationships, career, home } = finalStats;
 
     try {
-    const prompt = `
-        Based on the following final stats, write a story summarizing the player's journey during the game:
-        - Health: ${health}
-        - Money: ${money}
-        - Relationships: ${relationships}
-        - Career: ${career}
-        - Home: ${home}
-        
-        Include details about how they overcame challenges and what their final outcome looks like.
+        const prompt = `
+    Create a BRIEF summary (maximum 3-4 sentences) of the player's life journey based on these final stats on a scale of 1-10:
+    - Health: ${health}
+    - Money: ${money}
+    - Relationships: ${relationships}
+    - Career: ${career}
+    - Home: ${home}
+
+    Focus only on the most significant achievements or challenges. Keep it concise but detailed and engaging. giving specific information about the player's journey. (e.g, "He had 3000 dollars in his bank account, but he lost it all in a stock market crash.")
     `;
 
-    const response = await axios.post(
-        'https://api.claude.ai/generate',
-        { prompt },
-        {
-        headers: {
-            Authorization: `Bearer ${CLAUDE_API_KEY}`,
-            'Content-Type': 'application/json',
-        },
-        }
-    );
+    const msg = await anthropic.messages.create({
+        model: 'claude-3-sonnet-20240229',
+        max_tokens: 1024,
+        messages: [{ role: 'user', content: prompt }]
+    });
 
-    const story = response.data.result;
-    return story
+    return parseSummaryResponse(msg.content[0].text);
+
     } catch (error) {
-      console.error('Error generating summary with Claude API:', error.message);
-      res.status(500).json({ error: 'Failed to generate summary' });
+        console.error("Error generating summary:", error);
+        throw new Error("Failed to generate summary");
     }
 };
-  
-  module.exports = {
-    fetchScenario,
-    fetchSummary
-  };
-  
+
+module.exports = { fetchScenario, fetchSummary };

@@ -18,7 +18,7 @@ claude.post('/generate-scenario', async (req, res) => {
     }
 });
 
-claude.post('/generateSummary', async () => {
+claude.post('/generate-summary', async (req, res) => {
     const { health, money, relationships, career, home } = req.body;
 
     if (!health ||!money ||!relationships ||!career ||!home) {
@@ -34,4 +34,4 @@ claude.post('/generateSummary', async () => {
     }
 });
 
-module.exports = claude
+module.exports = claude;
