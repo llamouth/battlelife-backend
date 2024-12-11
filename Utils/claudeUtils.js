@@ -1,9 +1,8 @@
 const parseScenarioResponse = (response) => {
     const hitType = response.match(/Hit Type: (.+)/)?.[1]?.trim();
     const scenario = response.match(/Scenario: (.+)/)?.[1]?.trim();
-    const consequences = response.match(/Consequences: (.+)/)?.[1]?.trim();
 
-    return { hitType, scenario, consequences };
+    return { hitType, scenario};
 };
 
 const parseSummaryResponse = (response) => {
