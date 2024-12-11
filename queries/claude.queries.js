@@ -23,26 +23,25 @@ const fetchScenario = async ({shipType}) => {
         }
 
         const prompt = `
-BATTLESHIP LIFE SIMULATOR SCENARIO:
+        BATTLESHIP LIFE SIMULATOR SCENARIO:
 
-You are targeting a Life Ship of type: ${shipType}.
-Each ship represents a crucial aspect of life that can be "hit" with unexpected challenges.
-This is a ${shipType.toUpperCase()} class vessel, representing ${scenarioTemplates[shipType]}.
+        You are targeting a Life Ship of type: ${shipType}.
+        Each ship represents a crucial aspect of life that can be "hit" with unexpected challenges.
+        This is a ${shipType.toUpperCase()} class vessel, representing ${scenarioTemplates[shipType]}.
 
-Create a life-changing event that would "hit" this aspect of life:
-1. A BRIEF hit type (2-3 words describing the type of life challenge).
-2. A DETAILED scenario (3-4 sentences about how this life challenge unfolds).
-3. Potential CONSEQUENCES (how this "hit" affects the player's life journey).
+        Create a life-changing event that would "hit" this aspect of life:
+        1. A BRIEF hit type (2-3 words describing the type of life challenge).
+        2. A DETAILED scenario (3-4 sentences about how this life challenge unfolds).
+        3. Potential CONSEQUENCES (how this "hit" affects the player's life journey).
 
-Remember: This is a critical hit on the ${shipType} ship - make it impactful but survivable.
-Each choice should have different potential outcomes and risks.
+        Remember: This is a critical hit on the ${shipType} ship - make it impactful but survivable.
 
-Format your response exactly as:
+        Format your response exactly as:
 
-Hit Type: [concise description]
-Scenario: [narrative description]
-Consequences: [impact on the character]
-`;
+        Hit Type: [concise description]
+        Scenario: [narrative description]
+        Consequences: [impact on the character]
+        `;
 
         const msg = await anthropic.messages.create({
             model: 'claude-3-sonnet-20240229',
@@ -57,31 +56,29 @@ Consequences: [impact on the character]
     }
 };
 
-// Parse the API Response
-
 // Fetch Summary Function
 const fetchSummary = async (finalStats) => {
     const { health, money, relationships, career, home } = finalStats;
 
     try {
         const prompt = `
-    Create a BRIEF summary (maximum 3-4 sentences) of the player's life journey based on these final stats on a scale of 1-10:
-    - Health: ${health}
-    - Money: ${money}
-    - Relationships: ${relationships}
-    - Career: ${career}
-    - Home: ${home}
+        Create a BRIEF summary (maximum 3-4 sentences) of the player's life journey based on these final stats on a scale of 1-10:
+        - Health: ${health}
+        - Money: ${money}
+        - Relationships: ${relationships}
+        - Career: ${career}
+        - Home: ${home}
 
-    Focus only on the most significant achievements or challenges. Keep it concise but detailed and engaging. giving specific information about the player's journey. (e.g, "He had 3000 dollars in his bank account, but he lost it all in a stock market crash.")
-    `;
+        Focus only on the most significant achievements or challenges. Keep it concise but detailed and engaging. giving specific information about the player's journey. (e.g, "He had 3000 dollars in his bank account, but he lost it all in a stock market crash.")
+        `;
 
-    const msg = await anthropic.messages.create({
-        model: 'claude-3-sonnet-20240229',
-        max_tokens: 1024,
-        messages: [{ role: 'user', content: prompt }]
-    });
+        const msg = await anthropic.messages.create({
+            model: 'claude-3-sonnet-20240229',
+            max_tokens: 1024,
+            messages: [{ role: 'user', content: prompt }]
+        });
 
-    return parseSummaryResponse(msg.content[0].text);
+        return parseSummaryResponse(msg.content[0].text);
 
     } catch (error) {
         console.error("Error generating summary:", error);
