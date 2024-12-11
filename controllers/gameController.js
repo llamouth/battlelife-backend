@@ -12,9 +12,9 @@ const generateGameId = () => `game-${Date.now()}`;
 module.exports = {
   // Start a new game
   startGame: (req, res) => {
-    const { playerName, playerShips } = req.body;
+    const playerShips = req.body.playerName.placedShips
 
-    if (!playerName || !playerShips || playerShips.length !== 5) {
+    if (!playerShips ) {
       return res.status(400).json({ message: "Invalid game setup. Provide a name and all 5 ships." });
     }
 
@@ -23,9 +23,11 @@ module.exports = {
     const computerShips = randomShipPlacement(); // Computer places ships randomly
     const computerBoard = initializeBoard(computerShips);
 
+    console.log(playerBoard)
+    console.log(computerBoard)
+    console.log(computerShips)
     // Store game state
     games[gameId] = {
-      playerName,
       playerBoard,
       playerStats: { morale: 100, health: 100, perks: [] },
       computerBoard,
