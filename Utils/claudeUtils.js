@@ -3,27 +3,8 @@ const parseScenarioResponse = (response) => {
     const scenario = response.match(/Scenario: (.+)/)?.[1]?.trim();
     const consequences = response.match(/Consequences: (.+)/)?.[1]?.trim();
     
-    // Parse choices and their impacts
-    const choicesRegex = /([ABC]\) .+?)\s*\|\s*Impacts:\s*Health:\s*(-?\d+),\s*Money:\s*(-?\d+),\s*Relationships:\s*(-?\d+),\s*Looks:\s*(-?\d+),\s*Home:\s*(-?\d+)/g;
-    const choices = {};
-    
-    let match;
-    while ((match = choicesRegex.exec(response)) !== null) {
-        const [_, choiceText, health, money, relationships, looks, home] = match;
-        const choice = choiceText[0]; // A, B, or C
-        choices[choice] = {
-            text: choiceText.slice(3).trim(),
-            impacts: {
-                health: parseInt(health),
-                money: parseInt(money),
-                relationships: parseInt(relationships),
-                looks: parseInt(looks),
-                home: parseInt(home)
-            }
-        };
-    }
 
-    return { hitType, scenario, consequences, choices };
+    return { hitType, scenario, consequences };
 };
 
 const parseSummaryResponse = (response) => {
